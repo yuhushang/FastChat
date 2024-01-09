@@ -66,11 +66,17 @@ def get_modelpage_detail():
     # report = generate_report(sys_prompt, overall_report[MODEL_ID]["error_examples"])
     report = get_cache()
     ability_scores = overall_report[MODEL_ID]["score_per_category"]
+    ability_scores_array = []
+    for model, scores in ability_scores.items():
+        model_scores = {"model": model}
+        model_scores.update(scores)
+        # 将这个新字典添加到列表中
+        ability_scores_array.append(model_scores)
     result = {
         "request_id": request_id,
         "model_id": MODEL_ID,
         "score": overall_report[MODEL_ID]["score_total"],
-        "ability_scores": OrderedDict(ability_scores.items()),
+        "ability_scores": ability_scores_array,
         "model_description": MODEL_DICT.get(MODEL_ID, {}),
         "report": report
     }

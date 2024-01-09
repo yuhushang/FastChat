@@ -31,8 +31,6 @@ def read_jsonl_files(directory):
 
 from collections import defaultdict
 
-from collections import defaultdict
-
 
 def calculate_model_scores(data_id_list):
     overall_report = {}
