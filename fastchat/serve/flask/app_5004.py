@@ -1,7 +1,7 @@
 import json
 import os
 import uuid
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pprint import pprint
 
 import pandas as pd
@@ -57,19 +57,20 @@ def get_modelpage_list():
 def get_modelpage_detail():
     request_id = random_uuid()
     data = request.json
-    
     if not all(key in data for key in ['model_id']):
         return jsonify({"error": "Missing required fields in the request"}), 400
+    
     MODEL_ID = data.get('model_id')
     overall_report = calculate_model_scores(["moral_bench_test1"])
     # sys_prompt = get_system_prompt()
     # report = generate_report(sys_prompt, overall_report[MODEL_ID]["error_examples"])
     report = get_cache()
+    ability_scores = overall_report[MODEL_ID]["score_per_category"]
     result = {
         "request_id": request_id,
         "model_id": MODEL_ID,
         "score": overall_report[MODEL_ID]["score_total"],
-        "ability_scores": overall_report[MODEL_ID]["score_per_category"],
+        "ability_scores": OrderedDict(ability_scores.items()),
         "model_description": MODEL_DICT.get(MODEL_ID, {}),
         "report": report
     }
