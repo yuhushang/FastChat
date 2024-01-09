@@ -37,9 +37,11 @@ from collections import defaultdict
 def calculate_model_scores(data_id_list):
     overall_report = {}
     error_results = []
-    
+    app_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
     for data_id in data_id_list:
-        answers_directory_path = f"/home/workspace/FastChat/fastchat/llm_judge/data/{data_id}/model_answer"
+        answers_directory_path = os.path.join(app_dir, "llm_judge", "data", str(data_id), "model_answer")
+        print(answers_directory_path)
         model_answers = read_jsonl_files(answers_directory_path)
         
         for model, answers in model_answers.items():
