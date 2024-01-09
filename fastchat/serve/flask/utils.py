@@ -37,7 +37,7 @@ from collections import defaultdict
 def calculate_model_scores(data_id_list):
     overall_report = {}
     error_results = []
-    app_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    app_dir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
     for data_id in data_id_list:
         answers_directory_path = os.path.join(app_dir, "llm_judge", "data", str(data_id), "model_answer")
