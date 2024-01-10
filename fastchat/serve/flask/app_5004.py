@@ -251,7 +251,7 @@ def run_evaluate():
     dtype = str_to_torch_dtype(data.get('dtype', None))
     cache_dir = data.get('cache_dir', "/root/autodl-tmp/model")
     base_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    print("model_names:", model_names, "model_ids:", model_ids, "data_ids:", data_ids)
+    print("model_names:", model_names, "model_ids:", model_ids, "data_ids:", data_ids, "cache_dir:", cache_dir)
     try:
         start_time = get_start_time()
         outputs = []
