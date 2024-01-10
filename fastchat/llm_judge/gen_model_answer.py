@@ -100,7 +100,7 @@ def get_model_answers(
                                       local_files_only=False)
     print("model_dir:", model_dir)
     # llm = LLM(model=model_dir, trust_remote_code=True)
-    llm = LLM(model="/root/autodl-tmp/model/" + model_path, trust_remote_code=True)
+    llm = LLM(model=cache_dir + model_path, trust_remote_code=True)
     prompts = []
 
     for question in tqdm(questions):
