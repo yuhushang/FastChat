@@ -258,8 +258,7 @@ def run_evaluate():
         for data_id in data_ids:
             question_file = os.path.join(base_path, "llm_judge", "data", str(data_id), "question.jsonl")
             for model_name, model_id in zip(model_names, model_ids):
-                model_name1 = model_name.split('/')[-1]
-                output_file = os.path.join(base_path, "llm_judge", "data", str(data_id), "model_answer", f"{model_name1}.jsonl")
+                output_file = os.path.join(base_path, "llm_judge", "data", str(data_id), "model_answer", f"{model_id}.jsonl")
                 run_eval(
                     model_path=model_name,
                     model_id=model_id,
