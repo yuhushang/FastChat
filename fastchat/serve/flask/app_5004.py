@@ -232,16 +232,15 @@ def judge():
         return jsonify({"error": "Script execution failed"}), 500
 
 
-@app.route('/generate', methods=['POST'])
-def generate():
+@app.route('/run_evaluate', methods=['POST'])
+def run_evaluate():
     data = request.json
-    # Validate input data
-    if not all(key in data for key in ['model_name', 'model_id', 'data_id']):
+    if not all(key in data for key in ['model_names', 'model_ids', 'data_ids']):
         return jsonify({"error": "Missing required fields in the request"}), 400
-    model_name = data.get('model_name')
-    model_id = data.get('model_id')
-    data_id = data.get('data_id')
-    revision = data.get('revision')
+    model_names = data.get('model_names')
+    model_ids = data.get('model_ids')
+    data_ids = data.get('data_ids')
+    revision = data.get('revision', None)
     question_begin = data.get('question_begin', None)
     question_end = data.get('question_end', None)
     max_new_token = data.get('max_new_token', 1024)
@@ -250,57 +249,48 @@ def generate():
     num_gpus_total = data.get('num_gpus_total', 1)
     max_gpu_memory = data.get('max_gpu_memory', 16)
     dtype = str_to_torch_dtype(data.get('dtype', None))
-    
-    # GPUs = get_free_gpus()
-    # if "13b" in model_name or "13B" in model_name or "20b" in model_name or "20B" in model_name:
-    #     if len(GPUs) >= 2:
-    #         GPU = GPUs[:2]
-    #         GPU = ', '.join(map(str, GPU))
-    #         tensor_parallel_size = 2
-    #     else:
-    #         return "暂无空闲GPU..."
-    # else:
-    #     if GPUs:
-    #         GPU = GPUs[-1]
-    #         tensor_parallel_size = 1
-    #     else:
-    #         return "暂无空闲GPU..."
-    # print(f"use GPU {GPU}")
-    model_id = generate_random_model_id()
-    model_name1 = model_name.split('/')[-1]
-    output_file = f'/home/workspace/FastChat/fastchat/llm_judge/data/{data_id}/model_answer/{model_name1}.jsonl'
-    # command = f"/home/workspace/FastChat/scripts/infer_answer_vllm.sh \"{model_name}\" \"{model_id}\" \"{data_id}\" \"{GPU}\" \"{tensor_parallel_size}\" \"{output_file}\" \"{revision}\""
-    question_file = f"/home/workspace/FastChat/fastchat/llm_judge/data/{data_id}/question.jsonl"
-    
+    cache_dir = data.get('cache_dir', "/root/autodl-tmp/model")
+    base_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    print("model_names:", model_names, "model_ids:", model_ids, "data_ids:", data_ids)
     try:
         start_time = get_start_time()
-        run_eval(
-            model_path=model_name,
-            model_id=model_id,
-            question_file=question_file,
-            question_begin=question_begin,
-            question_end=question_end,
-            answer_file=output_file,
-            max_new_token=max_new_token,
-            num_choices=num_choices,
-            num_gpus_per_model=num_gpus_per_model,
-            num_gpus_total=num_gpus_total,
-            max_gpu_memory=max_gpu_memory,
-            dtype=dtype,
-            revision=revision
-        )
+        outputs = []
+        for data_id in data_ids:
+            question_file = os.path.join(base_path, "llm_judge", "data", str(data_id), "question.jsonl")
+            for model_name, model_id in zip(model_names, model_ids):
+                model_name1 = model_name.split('/')[-1]
+                output_file = os.path.join(base_path, "llm_judge", "data", str(data_id), "model_answer", f"{model_name1}.jsonl")
+                run_eval(
+                    model_path=model_name,
+                    model_id=model_id,
+                    question_file=question_file,
+                    question_begin=question_begin,
+                    question_end=question_end,
+                    answer_file=output_file,
+                    max_new_token=max_new_token,
+                    num_choices=num_choices,
+                    num_gpus_per_model=num_gpus_per_model,
+                    num_gpus_total=num_gpus_total,
+                    max_gpu_memory=max_gpu_memory,
+                    dtype=dtype,
+                    revision=revision,
+                    cache_dir=cache_dir
+                )
+                outputs.append({"data_id": data_id, "model_id": model_id, "model_name": model_name, "output": output_file})
         end_time = get_end_time()
-        result = {"outputfile": output_file,
-                  "model_name": model_name,
-                  "model_id": model_id,
-                  "data_id": data_id,
+        result = {"outputs": outputs,
+                  "model_names": model_names,
+                  "model_ids": model_ids,
+                  "data_ids": data_ids,
                   "time_start": start_time,
                   "time_end": end_time}
-        append_dict_to_jsonl(f"/home/workspace/FastChat/fastchat/llm_judge/data/{data_id}/app_output.jsonl",
-                             {model_id: result})
+        # append_dict_to_jsonl(f"/home/workspace/FastChat/fastchat/llm_judge/data/{data_id}/app_output.jsonl",
+        #                      {model_id: result})
         return jsonify(result)
     except subprocess.CalledProcessError:
         return jsonify({"error": "Script execution failed"}), 500
+    
+
 
 
 if __name__ == "__main__":
