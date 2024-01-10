@@ -25,7 +25,7 @@ app_dir = os.path.abspath(os.path.dirname(__file__))
 DATA_PATH = os.path.join(app_dir, 'resources', 'data_config.json')
 with open(DATA_PATH) as file:
     DATA_JSON = json.load(file)
-DATA_DICT = {dataset["data_id"]: dataset for dataset in DATA_JSON["datasets"]}
+DATA_DICT = {dataset["data_id"]: dataset for dataset in DATA_JSON[0]["datasets"]}
 
 MODEL_PATH = os.path.join(app_dir, 'resources', 'model_config.json')
 with open(MODEL_PATH) as file:
