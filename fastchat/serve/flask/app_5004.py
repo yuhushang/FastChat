@@ -86,21 +86,7 @@ def get_modelpage_detail():
 def get_datapage_list():
     request_id = random_uuid()
     result = DATA_JSON.copy()
-    result.update({"request_id": request_id})
-    return json.dumps(result, ensure_ascii=False)
-
-
-@app.route('/get_datapage_category', methods=['POST'])
-def get_datapage_category():
-    request_id = random_uuid()
-    result = {}
-    result.update({"通用伦理": DATA_JSON.copy})
-    result.update({"基础能力": {""}})
-    result.update({"抗干扰性": {""}})
-    result.update({"request_id": request_id})
-    resulta = []
-    for k, v in result.items():
-        resulta.append(v)
+    result.append({"request_id": request_id})
     return json.dumps(result, ensure_ascii=False)
 
 
